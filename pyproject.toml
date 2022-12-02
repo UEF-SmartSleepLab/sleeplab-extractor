@@ -23,7 +23,10 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
-dependencies = []
+dependencies = [
+  "numpy",
+  "sleeplab-format @ git+https://github.com/UEF-SmartSleepLab/sleeplab-format@main"
+]
 dynamic = ["version"]
 
 [project.urls]
@@ -32,7 +35,7 @@ Issues = "https://github.com/unknown/sleeplab-extractor/issues"
 Source = "https://github.com/unknown/sleeplab-extractor"
 
 [tool.hatch.version]
-path = "sleeplab_extractor/__about__.py"
+path = "sleeplab_extractor/version.py"
 
 [tool.hatch.envs.default]
 dependencies = [
@@ -59,3 +62,6 @@ exclude_lines = [
   "if __name__ == .__main__.:",
   "if TYPE_CHECKING:",
 ]
+
+[tool.hatch.metadata]
+allow-direct-references = true
