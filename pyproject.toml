@@ -25,14 +25,18 @@ classifiers = [
 ]
 dependencies = [
   "numpy",
+  "pyyaml",
   "sleeplab-format @ git+https://github.com/UEF-SmartSleepLab/sleeplab-format@main"
 ]
 dynamic = ["version"]
 
+[project.scripts]
+sleeplab-extract = "sleeplab_extractor.extract:run_cli"
+
 [project.urls]
-Documentation = "https://github.com/unknown/sleeplab-extractor#readme"
-Issues = "https://github.com/unknown/sleeplab-extractor/issues"
-Source = "https://github.com/unknown/sleeplab-extractor"
+Documentation = "https://github.com/UEF-SmartSleepLab/sleeplab-extractor#readme"
+Issues = "https://github.com/UEF-SmartSleepLab/sleeplab-extractor/issues"
+Source = "https://github.com/UEF-SmartSleepLab/sleeplab-extractor"
 
 [tool.hatch.version]
 path = "sleeplab_extractor/version.py"
@@ -53,7 +57,7 @@ python = ["37", "38", "39", "310", "311"]
 branch = true
 parallel = true
 omit = [
-  "sleeplab_extractor/__about__.py",
+  "sleeplab_extractor/version.py",
 ]
 
 [tool.coverage.report]

@@ -1,0 +1,26 @@
+series_configs:
+
+  - name: "series1"
+    array_configs:
+
+      - name: "signal1"
+        new_name: "signal1_32Hz"
+        actions:
+          
+          - name: "resample"
+            method: "scipy.signal.decimate"
+            attributes: 32
+
+      - name: "signal2"
+        new_name: "signal2_32Hz_hp"
+        actions:
+          
+          - name: "resample"
+            method: "scipy.signal.decimate"
+            sampling_rate: 32
+
+          - name: "highpass"
+            method: "sleeplab_extractor.preprocess.highpass"
+            cutoff: 0.3
+
+    
