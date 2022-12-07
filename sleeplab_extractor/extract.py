@@ -3,7 +3,7 @@ import argparse
 import logging
 
 from pathlib import Path
-from sleeplab_extractor import config
+from sleeplab_extractor import config, preprocess
 from sleeplab_format import reader, writer
 
 
@@ -20,10 +20,12 @@ def extract(src_dir: Path, dst_dir: Path, config_path: Path) -> None:
     ds = reader.read_dataset(src_dir, series_names=series_names)
     
     logger.info('Initializing preprocessing pipeline')
-    processed_ds = process_ds(ds, cfg)
+    for series_name, series in ds.series.items():
+        series = preprocess.process_series(series)
+        ds.series[series_name] = series
     
     logger.info(f'Applying preprocessing and writing processed dataset to {dst_dir}')
-    writer.write_dataset(processed_ds, dst_dir)
+    writer.write_dataset(ds, dst_dir)
 
 
 def get_parser():
