@@ -26,6 +26,7 @@ classifiers = [
 dependencies = [
   "numpy",
   "pyyaml",
+  "scipy",
   "sleeplab-format @ git+https://github.com/UEF-SmartSleepLab/sleeplab-format@main"
 ]
 dynamic = ["version"]

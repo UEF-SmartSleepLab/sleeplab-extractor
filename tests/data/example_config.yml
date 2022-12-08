@@ -8,19 +8,20 @@ series_configs:
         actions:
           
           - name: "resample"
-            method: "scipy.signal.decimate"
-            attributes: 32
+            method: "sleeplab_extractor.preprocess.decimate"
+            kwargs: {"fs_new": 32}
+            updated_attributes: {"sampling_rate": 32}
 
       - name: "signal2"
         new_name: "signal2_32Hz_hp"
         actions:
           
           - name: "resample"
-            method: "scipy.signal.decimate"
-            sampling_rate: 32
+            method: "sleeplab_extractor.preprocess.decimate"
+            kwargs: {"fs_new": 32}
+            updated_attributes: {"sampling_rate": 32}
 
           - name: "highpass"
             method: "sleeplab_extractor.preprocess.highpass"
-            cutoff: 0.3
-
+            kwargs: {"cutoff": 0.3}
     

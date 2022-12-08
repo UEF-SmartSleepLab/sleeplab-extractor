@@ -19,12 +19,17 @@ def extract(src_dir: Path, dst_dir: Path, config_path: Path) -> None:
     series_names = [series_config.name for series_config in cfg.series_configs]
     ds = reader.read_dataset(src_dir, series_names=series_names)
     
-    logger.info('Initializing preprocessing pipeline')
-    for series_name, series in ds.series.items():
-        series = preprocess.process_series(series)
-        ds.series[series_name] = series
+    updated_series = {}
+
+    for series_config in cfg.series_configs:
+        logger.info(f'Creating updated series {series_config.name}')
+        _series = preprocess.process_series(ds.series[series_config.name], series_config)
+        updated_series[series_config.name] = _series
     
-    logger.info(f'Applying preprocessing and writing processed dataset to {dst_dir}')
+    logger.info('Creating updated Dataset')
+    ds = ds.copy(update={'series': updated_series})
+
+    logger.info(f'Applying preprocessing and writing dataset to {dst_dir}')
     writer.write_dataset(ds, dst_dir)
 
 

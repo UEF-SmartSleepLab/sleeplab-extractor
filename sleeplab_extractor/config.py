@@ -2,13 +2,14 @@ import yaml
 
 from pathlib import Path
 from pydantic import BaseModel, Extra
+from typing import Any
 
 
 class ArrayAction(BaseModel, extra=Extra.forbid):
     name: str
     method: str
-    sampling_rate: str | None = None
-    cutoff: float | None = None
+    kwargs: dict[str, Any] | None = None
+    updated_attributes: dict[str, Any] | None = None
 
 
 class ArrayConfig(BaseModel, extra=Extra.forbid):
