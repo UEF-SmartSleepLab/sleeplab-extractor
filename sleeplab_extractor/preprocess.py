@@ -8,7 +8,7 @@ from typing import Callable
 
 
 def import_function(func_str: str) -> Callable:
-    module_str, func_name = func_str.rsplit('.', maxsplits=1)
+    module_str, func_name = func_str.rsplit('.', maxsplit=1)
     module = import_module(module_str)
     func = getattr(module, func_name)
     return func
@@ -36,7 +36,7 @@ def process_array(arr: SampleArray, cfg: ArrayConfig) -> SampleArray:
     arr = arr.copy(update={'name': cfg.new_name})
     for action in cfg.actions:
         _values_func = chain_action(arr.values_func, arr.attributes, action)
-        _attributes = arr.attributes.copy(updated=cfg.updated_attributes)
+        _attributes = arr.attributes.copy(update=action.updated_attributes)
         arr = arr.copy(update={'attributes': _attributes, 'values_func': _values_func})
 
     return arr
@@ -70,14 +70,15 @@ def _decimate(s: np.array, factor: int) -> np.array:
     if factor < 4:
         return scipy.signal.decimate(s, factor)
     else:
-        return _decimate(decimate(s, 2), factor // 2)
+        return _decimate(scipy.signal.decimate(s, 2), factor // 2)
 
 
 def decimate(
         s: np.array,
-        attributes: ArrayAttributes,
+        attributes: ArrayAttributes, *,
         fs_new: float,
         dtype: np.dtype = np.float32) -> np.array:
+    # TODO: cast to float64 before scipy filtering!!!
     ds_factor = int(attributes.sampling_rate // fs_new)
     return _decimate(s, ds_factor).astype(dtype)
 
