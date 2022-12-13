@@ -34,6 +34,7 @@ def process_array(arr: SampleArray, cfg: ArrayConfig) -> SampleArray:
     # cfg.method to validate and use the args.
     # This way, any function could be used for preprocessing without modifying sleeplab-extractor source code!
     arr = arr.copy(update={'name': cfg.new_name})
+    # TODO: Inconsistency in naming leads to wrongly named arrays when writing with slf.writer
     for action in cfg.actions:
         _values_func = chain_action(arr.values_func, arr.attributes, action)
         _attributes = arr.attributes.copy(update=action.updated_attributes)
