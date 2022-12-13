@@ -17,7 +17,7 @@ series_configs:
         actions:
           
           - name: "resample"
-            method: "sleeplab_extractor.preprocess.decimate"
+            method: "sleeplab_extractor.preprocess.resample_polyphase"
             kwargs: {"fs_new": 32}
             updated_attributes: {"sampling_rate": 32}
 

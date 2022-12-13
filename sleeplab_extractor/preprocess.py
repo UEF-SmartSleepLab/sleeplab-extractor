@@ -64,7 +64,7 @@ def is_power_of_two(x: float) -> bool:
 def _decimate(s: np.array, factor: int) -> np.array:
     """Implement decimation of powers of two by consecutive decimation by 2.
     
-    If higher factors are used, a lot of noise will be induced in the signals.
+    If higher factors are used, considerably more noise may be induced in the signals.
     """
     assert is_power_of_two(factor)
     if factor < 4:
@@ -78,9 +78,26 @@ def decimate(
         attributes: ArrayAttributes, *,
         fs_new: float,
         dtype: np.dtype = np.float32) -> np.array:
-    # TODO: cast to float64 before scipy filtering!!!
+    # Cast to float64 before IIR filtering!!!
+    s = s.astype(np.float64)
     ds_factor = int(attributes.sampling_rate // fs_new)
     return _decimate(s, ds_factor).astype(dtype)
+
+
+def resample_polyphase(
+        s: np.array,
+        attributes: ArrayAttributes, *,
+        fs_new: float,
+        dtype: np.dtype = np.float32) -> np.array:
+    """Resample the signal using scipy.signal.resample_polyphase."""
+    # Cast to float64 before filtering
+    s = s.astype(np.float64)
+    
+    up = int(fs_new)
+    down = int(attributes.sampling_rate)
+    
+    resampled = scipy.signal.resample_poly(s, up, down)
+    return resampled.astype(dtype)
 
 
 def cheby2_highpass_filtfilt(
@@ -106,6 +123,7 @@ def cheby2_highpass_filtfilt(
 
 def highpass(
         s: np.array,
-        attributes: ArrayAttributes,
-        cutoff: float) -> np.array:
-    return cheby2_highpass_filtfilt(s, attributes.sampling_rate, cutoff)
+        attributes: ArrayAttributes, *,
+        cutoff: float,
+        dtype=np.float32) -> np.array:
+    return cheby2_highpass_filtfilt(s, attributes.sampling_rate, cutoff).astype(dtype)
