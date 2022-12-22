@@ -1,5 +1,6 @@
 import yaml
 
+from enum import Enum
 from pathlib import Path
 from pydantic import BaseModel, Extra
 from typing import Any
@@ -25,6 +26,7 @@ class SeriesConfig(BaseModel, extra=Extra.forbid):
 
 class DatasetConfig(BaseModel, extra=Extra.forbid):
     series_configs: list[SeriesConfig]
+    annotation_format: str = 'json'
 
 
 def parse_config(config_path: Path) -> DatasetConfig:

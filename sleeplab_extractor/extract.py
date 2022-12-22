@@ -30,7 +30,7 @@ def extract(src_dir: Path, dst_dir: Path, config_path: Path) -> None:
     ds = ds.copy(update={'series': updated_series})
 
     logger.info(f'Applying preprocessing and writing dataset to {dst_dir}')
-    writer.write_dataset(ds, dst_dir)
+    writer.write_dataset(ds, dst_dir, annotation_format=cfg.annotation_format)
 
 
 def get_parser():

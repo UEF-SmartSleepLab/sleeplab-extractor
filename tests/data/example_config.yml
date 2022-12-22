@@ -1,25 +1,26 @@
+annotation_format: "parquet"
 series_configs:
 
   - name: "series1"
     array_configs:
 
-      - name: "signal1"
-        new_name: "signal1_32Hz"
+      - name: "s1"
+        new_name: "s1_8Hz"
         actions:
           
           - name: "resample"
             method: "sleeplab_extractor.preprocess.decimate"
-            kwargs: {"fs_new": 32}
-            updated_attributes: {"sampling_rate": 32}
+            kwargs: {"fs_new": 8}
+            updated_attributes: {"sampling_rate": 8}
 
-      - name: "signal2"
-        new_name: "signal2_32Hz_hp"
+      - name: "s2"
+        new_name: "s2_16Hz_hp"
         actions:
           
           - name: "resample"
             method: "sleeplab_extractor.preprocess.resample_polyphase"
-            kwargs: {"fs_new": 32}
-            updated_attributes: {"sampling_rate": 32}
+            kwargs: {"fs_new": 16}
+            updated_attributes: {"sampling_rate": 16}
 
           - name: "highpass"
             method: "sleeplab_extractor.preprocess.highpass"
