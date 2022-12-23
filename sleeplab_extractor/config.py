@@ -15,7 +15,6 @@ class ArrayAction(BaseModel, extra=Extra.forbid):
 
 class ArrayConfig(BaseModel, extra=Extra.forbid):
     name: str
-    new_name: str
     actions: list[ArrayAction] | None = None
 
 

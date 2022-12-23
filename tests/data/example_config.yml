@@ -1,26 +1,31 @@
+# annotation_format can be "parquet" or "json"
 annotation_format: "parquet"
+
 series_configs:
 
   - name: "series1"
     array_configs:
 
+      # The extraction for a given array consists of a chain of actions
       - name: "s1"
-        new_name: "s1_8Hz"
         actions:
           
+          # Each action has a freely defined name that is currently not stored anywhere.
+          # method is any python function that is automatically imported during the extraction.
+          # kwargs defines the arguments that are passed to the method.
+          # updated_attributes are the key-value pairs that are changed in sampl_array.attributes.
           - name: "resample"
             method: "sleeplab_extractor.preprocess.decimate"
             kwargs: {"fs_new": 8}
-            updated_attributes: {"sampling_rate": 8}
+            updated_attributes: {"sampling_rate": 8, "name": "s1_8Hz"}
 
       - name: "s2"
-        new_name: "s2_16Hz_hp"
         actions:
           
           - name: "resample"
             method: "sleeplab_extractor.preprocess.resample_polyphase"
             kwargs: {"fs_new": 16}
-            updated_attributes: {"sampling_rate": 16}
+            updated_attributes: {"sampling_rate": 16, "name": "s2_16Hz_hp"}
 
           - name: "highpass"
             method: "sleeplab_extractor.preprocess.highpass"

@@ -8,6 +8,10 @@ from typing import Callable
 
 
 def import_function(func_str: str) -> Callable:
+    """Import a function from a string.
+    
+    E.g. `import_function('sleeplab_extractor.preprocess.resample_polyphase')`
+    """
     module_str, func_name = func_str.rsplit('.', maxsplit=1)
     module = import_module(module_str)
     func = getattr(module, func_name)
@@ -27,14 +31,7 @@ def chain_action(
 
 
 def process_array(arr: SampleArray, cfg: ArrayConfig) -> SampleArray:
-    # TODO: Do we even need to use action names or would it be better to
-    # require a method and a dict of parameters for it?
-    # i. e. have a function add_action(sample_array, cfg), and cfg would contain something like
-    # attributes: {sampling_rate: 32} or {cutoff: 0.3}, and it would be responsibility of
-    # cfg.method to validate and use the args.
-    # This way, any function could be used for preprocessing without modifying sleeplab-extractor source code!
-    arr = arr.copy(update={'name': cfg.new_name})
-    # TODO: Inconsistency in naming leads to wrongly named arrays when writing with slf.writer
+    """Process a SampleArray according to the actions defined in cfg."""
     for action in cfg.actions:
         _values_func = chain_action(arr.values_func, arr.attributes, action)
         _attributes = arr.attributes.copy(update=action.updated_attributes)
@@ -50,8 +47,9 @@ def process_series(series: Series, cfg: SeriesConfig) -> Series:
 
         for array_cfg in cfg.array_configs:
             if array_cfg.name in subj.sample_arrays.keys():
-                _sample_arrays[array_cfg.new_name] = process_array(
-                    subj.sample_arrays[array_cfg.name], array_cfg)
+                #_sample_arrays[array_cfg.new_name] = process_array(
+                _arr = process_array(subj.sample_arrays[array_cfg.name], array_cfg)
+                _sample_arrays[_arr.attributes.name] = _arr
 
         updated_subjects[sid] = subj.copy(update={'sample_arrays': _sample_arrays})
 
