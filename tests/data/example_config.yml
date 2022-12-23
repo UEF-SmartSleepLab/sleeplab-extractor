@@ -1,12 +1,13 @@
-# annotation_format can be "parquet" or "json"
+# annotation_format can be "parquet" or "json".
 annotation_format: "parquet"
 
+# A separate config must be defined for each series that is desired to be extracted.
 series_configs:
 
   - name: "series1"
     array_configs:
 
-      # The extraction for a given array consists of a chain of actions
+      # The extraction for a given array consists of a chain of actions.
       - name: "s1"
         actions:
           
@@ -20,6 +21,8 @@ series_configs:
             updated_attributes: {"sampling_rate": 8, "name": "s1_8Hz"}
 
       - name: "s2"
+
+        # There can be multiple actions, which are executed in order.
         actions:
           
           - name: "resample"
