@@ -3,7 +3,7 @@ import scipy.signal
 
 from importlib import import_module
 from sleeplab_extractor.config import ArrayAction, ArrayConfig, SeriesConfig
-from sleeplab_format.models import ArrayAttributes, SampleArray, Series
+from sleeplab_format.models import ArrayAttributes, SampleArray, Series, SleepStage, Subject
 from typing import Callable
 
 
@@ -24,13 +24,18 @@ def chain_action(
         action: ArrayAction) -> Callable:
     """Use a closure to chain orig_func with an action."""
     def inner():
+        if action.kwargs is None:
+            return _func(orig_func(), orig_attrs)
+
         return _func(orig_func(), orig_attrs, **action.kwargs)
 
     _func = import_function(action.method)
     return inner
 
 
-def process_array(arr: SampleArray, cfg: ArrayConfig) -> SampleArray:
+def process_array(
+        arr: SampleArray,
+        cfg: ArrayConfig) -> SampleArray:
     """Process a SampleArray according to the actions defined in cfg."""
     for action in cfg.actions:
         _values_func = chain_action(arr.values_func, arr.attributes, action)
@@ -38,6 +43,32 @@ def process_array(arr: SampleArray, cfg: ArrayConfig) -> SampleArray:
         arr = arr.copy(update={'attributes': _attributes, 'values_func': _values_func})
 
     return arr
+
+
+def filter_by_tst(subject: Subject, min_tst_sec: float) -> bool:
+    allowed_stages = [
+        SleepStage.N1,
+        SleepStage.N2,
+        SleepStage.N3,
+        SleepStage.REM
+    ]
+    hg = subject.annotations['hypnogram'].annotations
+    tst = sum([ann.duration for ann in hg if ann.name in allowed_stages])
+    return tst >= min_tst_sec
+
+
+def process_subject(subject: Subject, cfg: SeriesConfig) -> Subject | None:
+    # TODO: migrate per-subject processing from process_series to here.
+    # The idea is to allow dropping subjects by returning None from here.
+    # I.e. the subject is not added to updated_subjects in process_series if None is returned.
+    # Then, add a mechanism to declare conditions in config.yaml.
+    # E.g. 'filter_conds' entry under series_configs, that can contain a list of conditions
+    # which all need to evaluate to true to keep the subject. The structure could be e.g.
+    # filter_conds:
+    # - name: "tst_gt_1h"
+    #   method: "sleeplab_extractor.preprocess.filter_by_tst"
+    #   kwargs: {"min_tst_sec": 3600}
+    pass
 
 
 def process_series(series: Series, cfg: SeriesConfig) -> Series:
@@ -126,3 +157,10 @@ def highpass(
         cutoff: float,
         dtype=np.float32) -> np.array:
     return cheby2_highpass_filtfilt(s, attributes.sampling_rate, cutoff).astype(dtype)
+
+
+def z_score_norm(
+        s: np.array,
+        attributes: ArrayAttributes,
+        dtype=np.float32) -> np.array:
+        return ((s - np.mean(s)) / np.std(s)).astype(dtype)
