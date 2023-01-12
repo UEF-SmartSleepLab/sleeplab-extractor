@@ -68,21 +68,23 @@ def process_subject(subject: Subject, cfg: SeriesConfig) -> Subject | None:
     # - name: "tst_gt_1h"
     #   method: "sleeplab_extractor.preprocess.filter_by_tst"
     #   kwargs: {"min_tst_sec": 3600}
-    pass
+    _sample_arrays = {}
+
+    for array_cfg in cfg.array_configs:
+        if array_cfg.name in subject.sample_arrays.keys():
+            #_sample_arrays[array_cfg.new_name] = process_array(
+            _arr = process_array(subject.sample_arrays[array_cfg.name], array_cfg)
+            _sample_arrays[_arr.attributes.name] = _arr
+
+    return subject.copy(update={'sample_arrays': _sample_arrays})
 
 
 def process_series(series: Series, cfg: SeriesConfig) -> Series:
     updated_subjects = {}
     for sid, subj in series.subjects.items():
-        _sample_arrays = {}
-
-        for array_cfg in cfg.array_configs:
-            if array_cfg.name in subj.sample_arrays.keys():
-                #_sample_arrays[array_cfg.new_name] = process_array(
-                _arr = process_array(subj.sample_arrays[array_cfg.name], array_cfg)
-                _sample_arrays[_arr.attributes.name] = _arr
-
-        updated_subjects[sid] = subj.copy(update={'sample_arrays': _sample_arrays})
+        _subj = process_subject(subj, cfg)
+        if _subj is not None:
+            updated_subjects[sid] = _subj
 
     return series.copy(update={'subjects': updated_subjects})
 
