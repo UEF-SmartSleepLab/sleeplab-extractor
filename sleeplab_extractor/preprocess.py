@@ -1,3 +1,4 @@
+import logging
 import numpy as np
 import scipy.signal
 
@@ -5,6 +6,9 @@ from importlib import import_module
 from sleeplab_extractor.config import ArrayAction, ArrayConfig, SeriesConfig
 from sleeplab_format.models import ArrayAttributes, SampleArray, Series, SleepStage, Subject
 from typing import Callable
+
+
+logger = logging.getLogger(__name__)
 
 
 def import_function(func_str: str) -> Callable:
@@ -45,18 +49,6 @@ def process_array(
     return arr
 
 
-def filter_by_tst(subject: Subject, min_tst_sec: float) -> bool:
-    allowed_stages = [
-        SleepStage.N1,
-        SleepStage.N2,
-        SleepStage.N3,
-        SleepStage.REM
-    ]
-    hg = subject.annotations['hypnogram'].annotations
-    tst = sum([ann.duration for ann in hg if ann.name in allowed_stages])
-    return tst >= min_tst_sec
-
-
 def process_subject(subject: Subject, cfg: SeriesConfig) -> Subject | None:
     # TODO: migrate per-subject processing from process_series to here.
     # The idea is to allow dropping subjects by returning None from here.
@@ -69,6 +61,17 @@ def process_subject(subject: Subject, cfg: SeriesConfig) -> Subject | None:
     #   method: "sleeplab_extractor.preprocess.filter_by_tst"
     #   kwargs: {"min_tst_sec": 3600}
     _sample_arrays = {}
+
+    if cfg.filter_conds is not None:
+        for cond in cfg.filter_conds:
+            _func = import_function(cond.method)
+            if cond.kwargs is None:
+                bool_keep = _func(subject)
+            else:
+                bool_keep = _func(subject, **cond.kwargs)
+
+            if not bool_keep:
+                return None
 
     for array_cfg in cfg.array_configs:
         if array_cfg.name in subject.sample_arrays.keys():
@@ -87,6 +90,18 @@ def process_series(series: Series, cfg: SeriesConfig) -> Series:
             updated_subjects[sid] = _subj
 
     return series.copy(update={'subjects': updated_subjects})
+
+
+def filter_by_tst(subject: Subject, min_tst_sec: float) -> bool:
+    allowed_stages = [
+        SleepStage.N1,
+        SleepStage.N2,
+        SleepStage.N3,
+        SleepStage.REM
+    ]
+    hg = subject.annotations['hypnogram'].annotations
+    tst = sum([ann.duration for ann in hg if ann.name in allowed_stages])
+    return tst >= min_tst_sec
 
 
 def is_power_of_two(x: float) -> bool:

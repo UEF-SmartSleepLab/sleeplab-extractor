@@ -1,4 +1,4 @@
-from sleeplab_extractor import extract
+from sleeplab_extractor import config, extract
 from sleeplab_format import reader
 
 
@@ -6,11 +6,14 @@ def test_extract_preprocess(ds_dir, tmp_path, example_config_path):
     orig_ds = reader.read_dataset(ds_dir)
     dst_dir = tmp_path / 'extracted_datasets'
     
-    extract.extract(ds_dir, dst_dir, example_config_path)
+    cfg = config.parse_config(example_config_path)
+    
+    extract.extract(ds_dir, dst_dir, cfg)
 
     extr_ds = reader.read_dataset(dst_dir / 'dataset1')
 
     assert orig_ds.name == extr_ds.name
+    assert len(extr_ds.series['series1'].subjects) == 3
 
     old_subj = orig_ds.series['series1'].subjects['10001']
     new_subj = extr_ds.series['series1'].subjects['10001']
@@ -21,3 +24,19 @@ def test_extract_preprocess(ds_dir, tmp_path, example_config_path):
     new_shape = new_subj.sample_arrays['s1_8Hz'].values_func().shape
  
     assert old_shape[0] == 4 * new_shape[0]
+
+
+def test_extract_preprocess_filter(ds_dir, tmp_path, example_config_path):
+    dst_dir = tmp_path / 'extracted_datasets'
+    
+    cfg = config.parse_config(example_config_path)
+
+    # There's 30s of sleep for each example subject. Raise min_tst_sec to 31s,
+    # and all subjects should be filtered out.
+    fconds = cfg.series_configs[0].filter_conds
+    fconds[0].kwargs['min_tst_sec'] = 31.0
+    
+    extract.extract(ds_dir, dst_dir, cfg)
+    extr_ds = reader.read_dataset(dst_dir / 'dataset1')
+
+    assert len(extr_ds.series['series1'].subjects) == 0

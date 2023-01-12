@@ -18,9 +18,16 @@ class ArrayConfig(BaseModel, extra=Extra.forbid):
     actions: list[ArrayAction] | None = None
 
 
+class FilterCond(BaseModel, extra=Extra.forbid):
+    name: str
+    method: str
+    kwargs: dict[str, Any] | None = None
+
+
 class SeriesConfig(BaseModel, extra=Extra.forbid):
     name: str
     array_configs: list[ArrayConfig]
+    filter_conds: list[FilterCond] | None = None
 
 
 class DatasetConfig(BaseModel, extra=Extra.forbid):

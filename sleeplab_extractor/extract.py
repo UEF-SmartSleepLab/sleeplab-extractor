@@ -10,11 +10,8 @@ from sleeplab_format import reader, writer
 logger = logging.getLogger(__name__)
 
 
-def extract(src_dir: Path, dst_dir: Path, config_path: Path) -> None:
+def extract(src_dir: Path, dst_dir: Path, cfg: config.DatasetConfig) -> None:
     """Read, preprocess, and write data in sleeplab format.""" 
-    logger.info(f'Reading config from {config_path}')
-    cfg = config.parse_config(config_path)
-    
     logger.info(f'Reading dataset from {src_dir}')
     series_names = [series_config.name for series_config in cfg.series_configs]
     ds = reader.read_dataset(src_dir, series_names=series_names)
@@ -46,10 +43,14 @@ def get_parser():
 def run_cli():
     parser = get_parser()
     args = parser.parse_args()
+    
+    logger.info(f'Reading config from {args.config_path}')
+    cfg = config.parse_config(Path(args.config_path))
+    
     extract(
         Path(args.src_dir),
         Path(args.dst_dir),
-        Path(args.config_path)
+        cfg
     )
 
 

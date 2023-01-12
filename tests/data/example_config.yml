@@ -5,6 +5,13 @@ annotation_format: "parquet"
 series_configs:
 
   - name: "series1"
+    
+    # Subjects can be filtered out of resulting dataset using filter conditions
+    filter_conds:
+      - name: "tst_less_than_30s"
+        method: "sleeplab_extractor.preprocess.filter_by_tst"
+        kwargs: {"min_tst_sec": 30.0}
+
     array_configs:
 
       # The extraction for a given array consists of a chain of actions.
