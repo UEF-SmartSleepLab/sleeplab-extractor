@@ -71,6 +71,7 @@ def process_subject(subject: Subject, cfg: SeriesConfig) -> Subject | None:
                 bool_keep = _func(subject, **cond.kwargs)
 
             if not bool_keep:
+                logger.info(f'Skipping subject {subject.metadata.subject_id} due to filter_cond {cond.name}')
                 return None
 
     for array_cfg in cfg.array_configs:
