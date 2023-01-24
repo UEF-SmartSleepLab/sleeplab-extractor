@@ -181,4 +181,4 @@ def z_score_norm(
         s: np.array,
         attributes: ArrayAttributes,
         dtype=np.float32) -> np.array:
-        return ((s - np.mean(s)) / np.std(s)).astype(dtype)
+    return ((s - np.mean(s)) / np.std(s)).astype(dtype)

@@ -27,7 +27,6 @@ dependencies = [
   "numpy",
   "pyyaml",
   "scipy",
-  # "sleeplab-format @ git+https://github.com/UEF-SmartSleepLab/sleeplab-format@main"
   "sleeplab-format @ git+ssh://git@github.com/UEF-SmartSleepLab/sleeplab-format@main"
 ]
 dynamic = ["version"]
@@ -41,7 +40,7 @@ Issues = "https://github.com/UEF-SmartSleepLab/sleeplab-extractor/issues"
 Source = "https://github.com/UEF-SmartSleepLab/sleeplab-extractor"
 
 [tool.hatch.version]
-path = "sleeplab_extractor/version.py"
+path = "src/sleeplab_extractor/version.py"
 
 [tool.hatch.envs.default]
 dependencies = [
@@ -49,7 +48,7 @@ dependencies = [
   "pytest-cov",
 ]
 [tool.hatch.envs.default.scripts]
-cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=sleeplab_extractor --cov=tests {args}"
+cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=src/sleeplab_extractor --cov=tests {args}"
 no-cov = "cov --no-cov {args}"
 
 [[tool.hatch.envs.test.matrix]]
@@ -59,7 +58,7 @@ python = ["37", "38", "39", "310", "311"]
 branch = true
 parallel = true
 omit = [
-  "sleeplab_extractor/version.py",
+  "src/sleeplab_extractor/version.py",
 ]
 
 [tool.coverage.report]
