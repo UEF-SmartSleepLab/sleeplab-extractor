@@ -1,6 +1,5 @@
 import yaml
 
-from enum import Enum
 from pathlib import Path
 from pydantic import BaseModel, Extra
 from typing import Any
@@ -9,7 +8,11 @@ from typing import Any
 class ArrayAction(BaseModel, extra=Extra.forbid):
     name: str
     method: str
-    kwargs: dict[str, Any] | None = None
+
+    # The name of an optional reference signal
+    ref_name: str | None
+    
+    kwargs: dict[str, Any] = {}
     updated_attributes: dict[str, Any] | None = None
 
 

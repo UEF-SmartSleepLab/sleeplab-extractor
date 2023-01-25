@@ -1,3 +1,4 @@
+import copy
 import logging
 import numpy as np
 import scipy.signal
@@ -25,24 +26,38 @@ def import_function(func_str: str) -> Callable:
 def chain_action(
         orig_func: Callable,
         orig_attrs: ArrayAttributes,
-        action: ArrayAction) -> Callable:
+        action: ArrayAction,
+        ref_func: Callable | None) -> Callable:
     """Use a closure to chain orig_func with an action."""
     def inner():
-        if action.kwargs is None:
-            return _func(orig_func(), orig_attrs)
+        kwargs = copy.deepcopy(action.kwargs)
+        if ref_func is not None:
+            kwargs['ref_s'] = ref_func()
 
-        return _func(orig_func(), orig_attrs, **action.kwargs)
+        return _func(orig_func(), orig_attrs, **kwargs)
 
     _func = import_function(action.method)
     return inner
 
 
 def process_array(
-        arr: SampleArray,
+        arr_dict: dict[str, SampleArray],
         cfg: ArrayConfig) -> SampleArray:
     """Process a SampleArray according to the actions defined in cfg."""
+    # Create a deep copy not to modify the source dataset
+    arr = arr_dict[cfg.name].copy(deep=True)
+
     for action in cfg.actions:
-        _values_func = chain_action(arr.values_func, arr.attributes, action)
+        if action.ref_name is not None:
+            ref_func = arr_dict[action.ref_name].values_func
+        else:
+            ref_func = None
+
+        _values_func = chain_action(
+            arr.values_func,
+            arr.attributes,
+            action,
+            ref_func)
         _attributes = arr.attributes.copy(update=action.updated_attributes)
         arr = arr.copy(update={'attributes': _attributes, 'values_func': _values_func})
 
@@ -50,16 +65,7 @@ def process_array(
 
 
 def process_subject(subject: Subject, cfg: SeriesConfig) -> Subject | None:
-    # TODO: migrate per-subject processing from process_series to here.
-    # The idea is to allow dropping subjects by returning None from here.
-    # I.e. the subject is not added to updated_subjects in process_series if None is returned.
-    # Then, add a mechanism to declare conditions in config.yaml.
-    # E.g. 'filter_conds' entry under series_configs, that can contain a list of conditions
-    # which all need to evaluate to true to keep the subject. The structure could be e.g.
-    # filter_conds:
-    # - name: "tst_gt_1h"
-    #   method: "sleeplab_extractor.preprocess.filter_by_tst"
-    #   kwargs: {"min_tst_sec": 3600}
+    """Process all conditions and sample arrays for a single subject."""
     _sample_arrays = {}
 
     if cfg.filter_conds is not None:
@@ -76,9 +82,10 @@ def process_subject(subject: Subject, cfg: SeriesConfig) -> Subject | None:
 
     for array_cfg in cfg.array_configs:
         if array_cfg.name in subject.sample_arrays.keys():
-            #_sample_arrays[array_cfg.new_name] = process_array(
-            _arr = process_array(subject.sample_arrays[array_cfg.name], array_cfg)
+            _arr = process_array(subject.sample_arrays, array_cfg)
             _sample_arrays[_arr.attributes.name] = _arr
+        else:
+            logger.warn(f'{array_cfg.name} not in sample arrays for subject {subject.metadata.subject_id}')
 
     return subject.copy(update={'sample_arrays': _sample_arrays})
 
@@ -182,3 +189,37 @@ def z_score_norm(
         attributes: ArrayAttributes,
         dtype=np.float32) -> np.array:
     return ((s - np.mean(s)) / np.std(s)).astype(dtype)
+
+
+def sub_ref(
+        s: np.array,
+        attributes: ArrayAttributes, *,
+        ref_s: np.array,
+        dtype=np.float32) -> np.array:
+    return (s - ref_s).astype(dtype)
+
+
+def add_ref(
+        s: np.array,
+        attributes: ArrayAttributes, *,
+        ref_s: np.array,
+        dtype=np.float32) -> np.array:
+    return (s + ref_s).astype(dtype)
+
+
+def upsample_linear(
+        s: np.array,
+        attributes: ArrayAttributes, *,
+        fs_new: float,
+        dtype=np.float32):
+    """Linear interpolation for upsampling signals such as SpO2."""
+    fs_orig = attributes.sampling_rate
+    n = len(s)
+    int_factor = fs_new // fs_orig
+    x = np.arange(0, int_factor*n, int_factor)
+    x_new = np.arange(int_factor*n - 1)
+    s_interp = np.interp(x_new, x, s)
+
+    # Repeat the last element to match signal lengths
+    s_interp = np.append(s_interp, s_interp[-1])
+    return s_interp.astype(dtype)
