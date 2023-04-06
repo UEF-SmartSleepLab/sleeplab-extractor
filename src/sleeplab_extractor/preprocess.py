@@ -190,6 +190,17 @@ def z_score_norm(
         dtype=np.float32) -> np.array:
     return ((s - np.mean(s)) / np.std(s)).astype(dtype)
 
+def iqr_norm(
+	s: np.array, attributes: 
+	ArrayAttributes, 
+	dtype=np.float32) -> np.array:
+    """Interquartile range standardization for the signal."""
+    q75, q25 = np.percentile(s, [75 ,25])
+    iqr = q75 - q25
+    if iqr == 0: 
+        return np.zeros(s.shape, dtype=dtype)
+    else:
+        return ((s - np.median(s)) / iqr).astype(dtype)
 
 def sub_ref(
         s: np.array,
