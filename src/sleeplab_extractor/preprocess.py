@@ -45,7 +45,7 @@ def process_array(
         cfg: ArrayConfig) -> SampleArray:
     """Process a SampleArray according to the actions defined in cfg."""
     # Create a deep copy not to modify the source dataset
-    arr = arr_dict[cfg.name].copy(deep=True)
+    arr = arr_dict[cfg.name].model_copy(deep=True)
 
     for action in cfg.actions:
         if action.ref_name is not None:
@@ -58,8 +58,8 @@ def process_array(
             arr.attributes,
             action,
             ref_func)
-        _attributes = arr.attributes.copy(update=action.updated_attributes)
-        arr = arr.copy(update={'attributes': _attributes, 'values_func': _values_func})
+        _attributes = arr.attributes.model_copy(update=action.updated_attributes)
+        arr = arr.model_copy(update={'attributes': _attributes, 'values_func': _values_func})
 
     return arr
 
@@ -87,7 +87,7 @@ def process_subject(subject: Subject, cfg: SeriesConfig) -> Subject | None:
         else:
             logger.warn(f'{array_cfg.name} not in sample arrays for subject {subject.metadata.subject_id}')
 
-    return subject.copy(update={'sample_arrays': _sample_arrays})
+    return subject.model_copy(update={'sample_arrays': _sample_arrays})
 
 
 def process_series(series: Series, cfg: SeriesConfig) -> Series:
@@ -97,7 +97,7 @@ def process_series(series: Series, cfg: SeriesConfig) -> Series:
         if _subj is not None:
             updated_subjects[sid] = _subj
 
-    return series.copy(update={'subjects': updated_subjects})
+    return series.model_copy(update={'subjects': updated_subjects})
 
 
 def filter_by_tst(subject: Subject, min_tst_sec: float) -> bool:
