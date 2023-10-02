@@ -5,7 +5,7 @@ import scipy.signal
 
 from importlib import import_module
 from sleeplab_extractor.config import ArrayAction, ArrayConfig, SeriesConfig
-from sleeplab_format.models import ArrayAttributes, SampleArray, Series, SleepStage, Subject
+from sleeplab_format.models import ArrayAttributes, SampleArray, Series, AASMSleepStage, Subject
 from typing import Callable
 
 
@@ -100,14 +100,17 @@ def process_series(series: Series, cfg: SeriesConfig) -> Series:
     return series.model_copy(update={'subjects': updated_subjects})
 
 
-def filter_by_tst(subject: Subject, min_tst_sec: float) -> bool:
+def filter_by_tst(
+        subject: Subject,
+        hypnogram_key: str,
+        min_tst_sec: float) -> bool:
     allowed_stages = [
-        SleepStage.N1,
-        SleepStage.N2,
-        SleepStage.N3,
-        SleepStage.REM
+        AASMSleepStage.N1,
+        AASMSleepStage.N2,
+        AASMSleepStage.N3,
+        AASMSleepStage.R
     ]
-    hg = subject.annotations['hypnogram'].annotations
+    hg = subject.annotations[hypnogram_key].annotations
     tst = sum([ann.duration for ann in hg if ann.name in allowed_stages])
     return tst >= min_tst_sec
 

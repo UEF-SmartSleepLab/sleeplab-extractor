@@ -10,7 +10,7 @@ series_configs:
     filter_conds:
       - name: "tst_less_than_30s"
         method: "sleeplab_extractor.preprocess.filter_by_tst"
-        kwargs: {"min_tst_sec": 30.0}
+        kwargs: {"min_tst_sec": 30.0, "hypnogram_key": "scorer_1_hypnogram"}
 
     array_configs:
 
