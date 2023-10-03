@@ -34,6 +34,7 @@ class SeriesConfig(BaseModel, extra='forbid'):
 
 
 class DatasetConfig(BaseModel, extra='forbid'):
+    new_dataset_name: str
     series_configs: list[SeriesConfig]
     annotation_format: str = 'json'
     array_format: str = 'numpy'

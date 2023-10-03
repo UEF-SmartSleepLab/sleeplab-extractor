@@ -24,7 +24,7 @@ def extract(src_dir: Path, dst_dir: Path, cfg: config.DatasetConfig) -> None:
         updated_series[series_config.name] = _series
     
     logger.info('Creating updated Dataset')
-    ds = ds.model_copy(update={'series': updated_series})
+    ds = ds.model_copy(update={'name': cfg.new_dataset_name, 'series': updated_series})
 
     logger.info(f'Applying preprocessing and writing dataset to {dst_dir}')
     writer.write_dataset(
