@@ -10,9 +10,9 @@ def test_extract_preprocess(ds_dir, tmp_path, example_config_path):
     
     extract.extract(ds_dir, dst_dir, cfg)
 
-    extr_ds = reader.read_dataset(dst_dir / 'dataset1')
+    extr_ds = reader.read_dataset(dst_dir / 'dataset1_extracted')
 
-    assert orig_ds.name == extr_ds.name
+    assert extr_ds.name == cfg.new_dataset_name
     assert len(extr_ds.series['series1'].subjects) == 3
 
     old_subj = orig_ds.series['series1'].subjects['10001']
@@ -37,6 +37,6 @@ def test_extract_preprocess_filter(ds_dir, tmp_path, example_config_path):
     fconds[0].kwargs['min_tst_sec'] = 31.0
     
     extract.extract(ds_dir, dst_dir, cfg)
-    extr_ds = reader.read_dataset(dst_dir / 'dataset1')
+    extr_ds = reader.read_dataset(dst_dir / 'dataset1_extracted')
 
     assert len(extr_ds.series['series1'].subjects) == 0
