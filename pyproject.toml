@@ -25,7 +25,7 @@ dependencies = [
   "numpy",
   "pyyaml",
   "scipy",
-  "sleeplab-format @ git+https://git@github.com/UEF-SmartSleepLab/sleeplab-format@annotations_v0.3"
+  "sleeplab-format"
 ]
 dynamic = ["version"]
 
