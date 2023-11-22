@@ -158,12 +158,13 @@ def resample_polyphase(
     return resampled.astype(dtype)
 
 
-def cheby2_highpass_filtfilt(
+def cheby2_filtfilt(
         s: np.array,
         fs: float,
         cutoff: float,
         order: int = 5,
-        rs: float = 40.0) -> np.array:
+        rs: float = 40.0,
+        btype='highpass') -> np.array:
     """Chebyshev type1 highpass filtering.
     
     Args:
@@ -175,7 +176,7 @@ def cheby2_highpass_filtfilt(
     """
     nyq = 0.5 * fs
     norm_cutoff = cutoff / nyq
-    sos = scipy.signal.cheby2(order, rs, norm_cutoff, btype='highpass', output='sos')
+    sos = scipy.signal.cheby2(order, rs, norm_cutoff, btype=btype, output='sos')
     return scipy.signal.sosfiltfilt(sos, s)
 
 
@@ -184,7 +185,15 @@ def highpass(
         attributes: ArrayAttributes, *,
         cutoff: float,
         dtype=np.float32) -> np.array:
-    return cheby2_highpass_filtfilt(s, attributes.sampling_rate, cutoff).astype(dtype)
+    return cheby2_filtfilt(s, attributes.sampling_rate, cutoff, btype='highpass').astype(dtype)
+
+
+def lowpass(
+        s: np.array,
+        attributes: ArrayAttributes, *,
+        cutoff: float,
+        dtype=np.float32) -> np.array:
+    return cheby2_filtfilt(s, attributes.sampling_rate, cutoff, btype='lowpass').astype(dtype)
 
 
 def z_score_norm(
